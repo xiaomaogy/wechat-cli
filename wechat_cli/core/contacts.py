@@ -7,33 +7,38 @@ import sqlite3
 
 _contact_names = None  # {username: display_name}
 _contact_full = None   # [{username, nick_name, remark}]
+_contact_flags = None  # {username: contact.flag (int)}  — for downstream
+                       # consumers that need to inspect per-contact bits like
+                       # bit 28 (折叠群聊). Populated lazily alongside _names.
 _self_username = None
 
 
 def _load_contacts_from(db_path):
     names = {}
     full = []
+    flags = {}
     conn = sqlite3.connect(db_path)
     try:
-        for r in conn.execute("SELECT username, nick_name, remark FROM contact").fetchall():
-            uname, nick, remark = r
+        for r in conn.execute("SELECT username, nick_name, remark, flag FROM contact").fetchall():
+            uname, nick, remark, flag = r
             display = remark if remark else nick if nick else uname
             names[uname] = display
             full.append({'username': uname, 'nick_name': nick or '', 'remark': remark or ''})
+            flags[uname] = int(flag or 0)
     finally:
         conn.close()
-    return names, full
+    return names, full, flags
 
 
 def get_contact_names(cache, decrypted_dir):
-    global _contact_names, _contact_full
+    global _contact_names, _contact_full, _contact_flags
     if _contact_names is not None:
         return _contact_names
 
     pre_decrypted = os.path.join(decrypted_dir, "contact", "contact.db")
     if os.path.exists(pre_decrypted):
         try:
-            _contact_names, _contact_full = _load_contacts_from(pre_decrypted)
+            _contact_names, _contact_full, _contact_flags = _load_contacts_from(pre_decrypted)
             return _contact_names
         except Exception:
             pass
@@ -41,7 +46,7 @@ def get_contact_names(cache, decrypted_dir):
     path = cache.get(os.path.join("contact", "contact.db"))
     if path:
         try:
-            _contact_names, _contact_full = _load_contacts_from(path)
+            _contact_names, _contact_full, _contact_flags = _load_contacts_from(path)
             return _contact_names
         except Exception:
             pass
@@ -54,6 +59,17 @@ def get_contact_full(cache, decrypted_dir):
     if _contact_full is None:
         get_contact_names(cache, decrypted_dir)
     return _contact_full or []
+
+
+def get_contact_flags(cache, decrypted_dir):
+    """Return {username: contact.flag int}. Bit 28 (0x10000000) corresponds to
+    WeChat's 折叠群聊 — groups with that bit set are tucked under the
+    "折叠的群聊" entry. Other bits encode unrelated state (e.g., bit 11 / 2048
+    for old/expired event groups). Empty dict if contact.db can't be loaded."""
+    global _contact_flags
+    if _contact_flags is None:
+        get_contact_names(cache, decrypted_dir)
+    return _contact_flags or {}
 
 
 def resolve_username(chat_name, cache, decrypted_dir):

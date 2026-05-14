@@ -7,9 +7,14 @@ from datetime import datetime
 
 import click
 
-from ..core.contacts import get_contact_names
+from ..core.contacts import get_contact_flags, get_contact_names
 from ..core.messages import decompress_content, format_msg_type
 from ..output.formatter import output
+
+# Bit 28 of contact.flag — WeChat's 折叠群聊 ("fold this group into the
+# collapsed-groups entry") indicator. Other bits encode unrelated state and
+# should not be conflated with fold state.
+_CONTACT_FLAG_FOLDED_BIT = 1 << 28
 
 
 @click.command("sessions")
@@ -33,6 +38,7 @@ def sessions(ctx, limit, fmt):
         ctx.exit(3)
 
     names = get_contact_names(app.cache, app.decrypted_dir)
+    flags = get_contact_flags(app.cache, app.decrypted_dir)
     with closing(sqlite3.connect(path)) as conn:
         rows = conn.execute("""
             SELECT username, unread_count, summary, last_timestamp,
@@ -62,11 +68,14 @@ def sessions(ctx, limit, fmt):
         if is_group and sender:
             sender_display = names.get(sender, sender_name or sender)
 
-        # `is_hidden` = the "不显示在聊天列表中" toggle.
-        # `status` is a bitmask WeChat uses for per-session flags (mute /
-        # fold-into-collapsed-group / etc.). We surface both raw so callers can
-        # interpret them — semantics may differ across WeChat client versions,
-        # so we don't try to decode here.
+        # `is_hidden`  — the "不显示在聊天列表中" SessionTable toggle.
+        # `status`     — SessionTable bitmask (bit 1 = mute). Surfaced raw.
+        # `is_folded`  — derived from contact.flag bit 28; WeChat's 折叠群聊.
+        #                Lives in a different table than `status`/`is_hidden`,
+        #                which is why earlier attempts to read fold state out
+        #                of SessionTable alone missed groups that were folded
+        #                but not muted.
+        contact_flag = flags.get(username, 0)
         results.append({
             'chat': display,
             'username': username,
@@ -79,6 +88,7 @@ def sessions(ctx, limit, fmt):
             'time': datetime.fromtimestamp(ts).strftime('%m-%d %H:%M'),
             'is_hidden': bool(is_hidden),
             'status': int(status or 0),
+            'is_folded': bool(contact_flag & _CONTACT_FLAG_FOLDED_BIT),
         })
 
     if fmt == 'json':
