@@ -4,9 +4,10 @@
 
 **命令行查询本地微信数据，专为 AI 集成设计。**
 
-[![npm version](https://img.shields.io/npm/v/@canghe_ai/wechat-cli.svg)](https://www.npmjs.com/package/@canghe_ai/wechat-cli)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](https://github.com/freestylefly/wechat-cli)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](https://github.com/xiaomaogy/wechat-cli)
+
+> 本仓库 fork 自 [freestylefly/wechat-cli](https://github.com/freestylefly/wechat-cli)（经由 [lijinma/wechat-cli](https://github.com/lijinma/wechat-cli)），在其基础上增加了 init 扫描器自动重试逻辑，确保首次运行时所有已加密数据库的密钥都能完整写入。
 
 聊天记录 · 联系人 · 会话 · 收藏 · 统计 · 导出
 
@@ -18,7 +19,6 @@
 
 ## ✨ 功能亮点
 
-- **🚀 开箱即用** — `npm install -g` 一键安装，无需 Python
 - **📦 11 个命令** — sessions、history、search、contacts、members、stats、export、favorites、unread、new-messages、init
 - **🤖 AI 优先** — 默认 JSON 输出，专为 LLM Agent 工具调用设计
 - **🔒 全程本地** — SQLCipher 即时解密，数据不出本机
@@ -29,34 +29,23 @@
 
 ## 📥 安装（给人类看）
 
-AI Agent 请直接移步到“安装（给 Agent 看）”
+AI Agent 请直接移步到"安装（给 Agent 看）"
 
-### npm（推荐）
+本 fork 未发布到 npm 或 PyPI，请从源码安装。
+
+### pipx（推荐）
 
 ```bash
-npm install -g @canghe_ai/wechat-cli
+git clone https://github.com/xiaomaogy/wechat-cli.git
+pipx install ./wechat-cli
 ```
 
-> 目前提供 **macOS arm64** 二进制。其他平台可使用下方 pip 安装。欢迎提交其他平台二进制 PR。
+需要 Python >= 3.10。`pipx` 会在独立 venv 中安装，避免与系统 Python 冲突。
 
-**更新到最新版本：**
-
-```bash
-npm update -g @canghe_ai/wechat-cli
-```
-
-### pip
+### pip（可编辑安装）
 
 ```bash
-pip install wechat-cli
-```
-
-需要 Python >= 3.10。
-
-### 从源码安装
-
-```bash
-git clone https://github.com/freestylefly/wechat-cli.git
+git clone https://github.com/xiaomaogy/wechat-cli.git
 cd wechat-cli
 pip install -e .
 ```
@@ -68,14 +57,12 @@ pip install -e .
 直接将在你的 Claude Code 或者 OpenClaw 中输入以下提示即可：
 
 ```bash
-帮我配置并安装：npm install -g @canghe_ai/wechat-cli
+帮我从 https://github.com/xiaomaogy/wechat-cli 克隆并用 pipx 安装 wechat-cli。
 ```
 
 比如在 Claude Code 中输入：
 
 ![install-claude-code-1](image/install-claude-code-1.png)
-
-注意：请先确保有 node.js 环境。没雨可以让你的 cc 安装环境。
 
 ## 🚀 快速开始
 
@@ -375,10 +362,12 @@ wechat-cli new-messages                    # 后续: 仅返回上次以来的新
 
 ## 🙏 致谢
 
-本项目基于 [wechat-decrypt](https://github.com/ylytdeng/wechat-decrypt) 开发，该仓库提供了微信数据库解密和数据解析的核心能力。
+- [freestylefly/wechat-cli](https://github.com/freestylefly/wechat-cli) — 本 fork 所基于的原始 WeChat CLI 项目。
+- [lijinma/wechat-cli](https://github.com/lijinma/wechat-cli) — 中间 fork，增加了 macOS 图片解密、`--media` 参数、view-unread 命令以及自动重新签名流程。
+- [wechat-decrypt](https://github.com/ylytdeng/wechat-decrypt) — 提供了微信数据库解密和数据解析的核心能力。
 
 ---
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=freestylefly/wechat-cli&type=Date)](https://star-history.com/#freestylefly/wechat-cli&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=xiaomaogy/wechat-cli&type=Date)](https://star-history.com/#xiaomaogy/wechat-cli&Date)

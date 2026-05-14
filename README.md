@@ -4,9 +4,10 @@
 
 **Query your local WeChat data from the command line.**
 
-[![npm version](https://img.shields.io/npm/v/@canghe_ai/wechat-cli.svg)](https://www.npmjs.com/package/@canghe_ai/wechat-cli)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](https://github.com/freestylefly/wechat-cli)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](https://github.com/xiaomaogy/wechat-cli)
+
+> Fork of [freestylefly/wechat-cli](https://github.com/freestylefly/wechat-cli) (via [lijinma/wechat-cli](https://github.com/lijinma/wechat-cli)) with a retrying init scanner so all encrypted DB keys are persisted on the first run.
 
 Chat history · Contacts · Sessions · Favorites · Statistics · Export
 
@@ -18,7 +19,6 @@ Chat history · Contacts · Sessions · Favorites · Statistics · Export
 
 ## ✨ Highlights
 
-- **🚀 Zero-config install** — `npm install -g` and you're done, no Python needed
 - **📦 11 commands** — sessions, history, search, contacts, members, stats, export, favorites, unread, new-messages, init
 - **🤖 AI-first** — JSON output by default, designed for LLM agent tool calls
 - **🔒 Fully local** — on-the-fly SQLCipher decryption, data never leaves your machine
@@ -31,32 +31,21 @@ Chat history · Contacts · Sessions · Favorites · Statistics · Export
 
 AI Agents — skip ahead to "Installation (For AI Agents)" below.
 
-### npm (Recommended)
+This fork is not published to npm or PyPI. Install from source.
+
+### pipx (Recommended)
 
 ```bash
-npm install -g @canghe_ai/wechat-cli
+git clone https://github.com/xiaomaogy/wechat-cli.git
+pipx install ./wechat-cli
 ```
 
-> Currently ships a **macOS arm64** binary. Other platforms can use the pip method below. PRs with additional platform binaries are welcome.
+Requires Python >= 3.10. `pipx` isolates the install in its own venv so it won't fight your system Python.
 
-**Update to the latest version:**
-
-```bash
-npm update -g @canghe_ai/wechat-cli
-```
-
-### pip
+### pip (editable)
 
 ```bash
-pip install wechat-cli
-```
-
-Requires Python >= 3.10.
-
-### From Source
-
-```bash
-git clone https://github.com/freestylefly/wechat-cli.git
+git clone https://github.com/xiaomaogy/wechat-cli.git
 cd wechat-cli
 pip install -e .
 ```
@@ -68,14 +57,12 @@ pip install -e .
 Simply paste the following prompt into Claude Code, OpenClaw, or any AI coding agent:
 
 ```bash
-帮我配置并安装：npm install -g @canghe_ai/wechat-cli
+帮我从 https://github.com/xiaomaogy/wechat-cli 克隆并用 pipx 安装 wechat-cli。
 ```
 
 For example, in Claude Code:
 
 ![install-claude-code-1](image/install-claude-code-1.png)
-
-Note: Make sure you have Node.js installed first. You can ask your agent to set it up if needed.
 
 ---
 
@@ -377,10 +364,12 @@ This project is a local data query tool for personal use only. Please note:
 
 ## 🙏 Acknowledgements
 
-This project is built on top of [wechat-decrypt](https://github.com/ylytdeng/wechat-decrypt), which provides the core WeChat database decryption and data parsing capabilities.
+- [freestylefly/wechat-cli](https://github.com/freestylefly/wechat-cli) — original WeChat CLI project that this fork is built on.
+- [lijinma/wechat-cli](https://github.com/lijinma/wechat-cli) — intermediate fork that added the macOS image decryption, `--media` flag, view-unread command, and auto re-sign flow.
+- [wechat-decrypt](https://github.com/ylytdeng/wechat-decrypt) — core WeChat database decryption and data parsing capabilities.
 
 ---
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=freestylefly/wechat-cli&type=Date)](https://star-history.com/#freestylefly/wechat-cli&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=xiaomaogy/wechat-cli&type=Date)](https://star-history.com/#xiaomaogy/wechat-cli&Date)
