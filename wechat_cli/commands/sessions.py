@@ -36,7 +36,8 @@ def sessions(ctx, limit, fmt):
     with closing(sqlite3.connect(path)) as conn:
         rows = conn.execute("""
             SELECT username, unread_count, summary, last_timestamp,
-                   last_msg_type, last_msg_sender, last_sender_display_name
+                   last_msg_type, last_msg_sender, last_sender_display_name,
+                   is_hidden, status
             FROM SessionTable
             WHERE last_timestamp > 0
             ORDER BY last_timestamp DESC
@@ -45,7 +46,10 @@ def sessions(ctx, limit, fmt):
 
     results = []
     for r in rows:
-        username, unread, summary, ts, msg_type, sender, sender_name = r
+        (
+            username, unread, summary, ts, msg_type, sender, sender_name,
+            is_hidden, status,
+        ) = r
         display = names.get(username, username)
         is_group = '@chatroom' in username
 
@@ -58,6 +62,11 @@ def sessions(ctx, limit, fmt):
         if is_group and sender:
             sender_display = names.get(sender, sender_name or sender)
 
+        # `is_hidden` = the "不显示在聊天列表中" toggle.
+        # `status` is a bitmask WeChat uses for per-session flags (mute /
+        # fold-into-collapsed-group / etc.). We surface both raw so callers can
+        # interpret them — semantics may differ across WeChat client versions,
+        # so we don't try to decode here.
         results.append({
             'chat': display,
             'username': username,
@@ -68,6 +77,8 @@ def sessions(ctx, limit, fmt):
             'sender': sender_display,
             'timestamp': ts,
             'time': datetime.fromtimestamp(ts).strftime('%m-%d %H:%M'),
+            'is_hidden': bool(is_hidden),
+            'status': int(status or 0),
         })
 
     if fmt == 'json':
